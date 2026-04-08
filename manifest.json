@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "CelcomDigi Ticket Logger",
+  "version": "1.0",
+  "description": "Log resolved support tickets and export to Excel",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Log Ticket"
+  },
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://daisy.daythree.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://daisy.daythree.ai/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "icon.png"
+  }
+}

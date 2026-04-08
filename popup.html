@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ticket Logger</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 420px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      background: #f4f6f9;
+      color: #1a1a2e;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #FF6200, #cc4e00);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo {
+      font-size: 20px;
+    }
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .header-sub {
+      font-size: 11px;
+      opacity: 0.85;
+    }
+    .tab-row {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid #e0e4ed;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: #FF6200;
+      border-bottom: 3px solid #FF6200;
+      background: #fff8f4;
+    }
+    .tab:hover:not(.active) { background: #f9f9f9; }
+
+    /* PANELS */
+    .panel { display: none; padding: 14px 16px; }
+    .panel.active { display: block; }
+
+    /* FORM */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    input, select, textarea {
+      border: 1.5px solid #dde2ec;
+      border-radius: 6px;
+      padding: 7px 9px;
+      font-size: 12.5px;
+      font-family: inherit;
+      background: #fff;
+      color: #1a1a2e;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #FF6200;
+      box-shadow: 0 0 0 3px rgba(255,98,0,0.1);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+    .btn {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #FF6200; color: white; }
+    .btn-primary:hover { background: #cc4e00; }
+    .btn-secondary { background: #e8eaf2; color: #444; }
+    .btn-secondary:hover { background: #d5d8e8; }
+
+    .toast {
+      display: none;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .toast.success { background: #e6f9f0; color: #1a7a4a; display: block; }
+    .toast.error { background: #fdecea; color: #b00020; display: block; }
+
+    /* RECORDS TAB */
+    .records-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .records-toolbar span {
+      font-size: 12px;
+      color: #888;
+      flex: 1;
+    }
+    .badge {
+      background: #FF6200;
+      color: white;
+      border-radius: 12px;
+      padding: 1px 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .btn-export {
+      background: #1a7a4a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-export:hover { background: #155e38; }
+    .btn-clear {
+      background: #fdecea;
+      color: #b00020;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-clear:hover { background: #f5c6c2; }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 0;
+      color: #aaa;
+      font-size: 13px;
+    }
+    .empty-state div { font-size: 30px; margin-bottom: 8px; }
+
+    .record-card {
+      background: white;
+      border: 1.5px solid #e8eaf2;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .record-card:hover { border-color: #FF6200; }
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .record-ticket {
+      font-weight: 700;
+      font-size: 12px;
+      color: #FF6200;
+    }
+    .record-date { font-size: 11px; color: #999; }
+    .record-category { font-size: 11.5px; color: #555; margin-bottom: 3px; }
+    .record-desc {
+      font-size: 11.5px;
+      color: #777;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 340px;
+    }
+    .record-delete {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #ccc;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .record-delete:hover { color: #b00020; background: #fdecea; }
+
+    .sr-num {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-logo">🎫</div>
+    <div>
+      <div class="header-title">CelcomDigi Ticket Logger</div>
+      <div class="header-sub">L2 Support — Quick Record & Export</div>
+    </div>
+  </div>
+
+  <div class="tab-row">
+    <div class="tab active" data-tab="log">➕ Log Ticket</div>
+    <div class="tab" data-tab="records">📋 Records <span class="badge" id="count-badge">0</span></div>
+  </div>
+
+  <!-- LOG TICKET PANEL -->
+  <div class="panel active" id="panel-log">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="field-date" />
+      </div>
+      <div class="form-group">
+        <label>Ticket ID</label>
+        <input type="text" id="field-ticket" placeholder="20260225-01221-156" />
+      </div>
+      <div class="form-group full">
+        <label>Category</label>
+        <input type="text" id="field-category" placeholder="e.g. eSIM Activation / Registration Issue" />
+      </div>
+      <div class="form-group full">
+        <label>Category According to You</label>
+        <input type="text" id="field-category-you" placeholder="e.g. eSIM Activation / Registration Issue" />
+      </div>
+      <div class="form-group full">
+        <label>Issue Type</label>
+        <select id="field-issue-type">
+          <option value="">-- Select Issue Type --</option>
+          <option>One-Off / Intermittent Issues</option>
+          <option>Recurring Issues</option>
+          <option>Configuration Issue</option>
+          <option>User Error</option>
+          <option>System Bug</option>
+          <option>Network Issue</option>
+          <option>Account Issue</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea id="field-desc" placeholder="Describe the issue reported by the subscriber..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Response</label>
+        <textarea id="field-response" placeholder="Your resolution / response..."></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-clear-form">Clear</button>
+      <button class="btn btn-primary" id="btn-save">💾 Save Ticket</button>
+    </div>
+    <div class="toast" id="form-toast"></div>
+  </div>
+
+  <!-- RECORDS PANEL -->
+  <div class="panel" id="panel-records">
+    <div class="records-toolbar">
+      <span id="records-count-text">0 tickets logged</span>
+      <button class="btn-export" id="btn-export">⬇ Export Excel</button>
+      <button class="btn-clear" id="btn-clear-all">🗑 Clear All</button>
+    </div>
+    <div id="records-list">
+      <div class="empty-state">
+        <div>📭</div>
+        No tickets logged yet.<br/>Use the Log Ticket tab to add one.
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
