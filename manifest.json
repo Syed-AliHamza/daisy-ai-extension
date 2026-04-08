@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "CelcomDigi Ticket Logger",
+  "name": "Daisy AI",
   "version": "1.0",
-  "description": "Log resolved support tickets and export to Excel",
+  "description": "AI-powered ticket resolution and logging assistant for CelcomDigi support agents",
   "action": {
     "default_popup": "popup.html",
     "default_title": "Log Ticket"
