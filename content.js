@@ -14,7 +14,7 @@
   captureBtn.style.cssText = `
     position: fixed;
     bottom: 50px;
-    right: 50px;
+    left: 50px;
     z-index: 999999;
     background: linear-gradient(135deg, #FF6200, #cc4e00);
     color: white;
