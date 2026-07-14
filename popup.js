@@ -1,7 +1,5 @@
-// ─── STATE
 let tickets = [];
 
-// ─── INIT
 document.addEventListener('DOMContentLoaded', async () => {
   setTodayDate();
   await loadTickets();
@@ -21,7 +19,6 @@ function setTodayDate() {
   document.getElementById('field-date').value = `${yyyy}-${mm}-${dd}`;
 }
 
-// ─── STORAGE
 function loadTickets() {
   return new Promise(resolve => {
     chrome.storage.local.get(['tickets'], result => {
@@ -37,7 +34,6 @@ function saveTickets() {
   });
 }
 
-// ─── TABS
 function setupTabs() {
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -50,7 +46,6 @@ function setupTabs() {
   });
 }
 
-// ─── FORM
 function setupForm() {
   document.getElementById('btn-save').addEventListener('click', saveTicket);
   document.getElementById('btn-clear-form').addEventListener('click', clearForm);
@@ -80,12 +75,12 @@ async function saveTicket() {
 }
 
 function clearForm() {
-  document.getElementById('field-ticket').value   = '';
-  document.getElementById('field-category').value = '';
-  document.getElementById('field-category-you').value = '';
-  document.getElementById('field-issue-type').value   = '';
-  document.getElementById('field-desc').value     = '';
-  document.getElementById('field-response').value = '';
+  document.getElementById('field-ticket').value        = '';
+  document.getElementById('field-category').value      = '';
+  document.getElementById('field-category-you').value  = '';
+  document.getElementById('field-issue-type').value    = '';
+  document.getElementById('field-desc').value          = '';
+  document.getElementById('field-response').value      = '';
   setTodayDate();
 }
 
@@ -96,7 +91,6 @@ function showToast(msg, type) {
   setTimeout(() => { el.className = 'toast'; }, 3000);
 }
 
-// ─── RECORDS
 function renderRecords() {
   const list = document.getElementById('records-list');
   document.getElementById('records-count-text').textContent =
@@ -130,7 +124,6 @@ function renderRecords() {
     btn.addEventListener('click', async () => {
       const idx = parseInt(btn.dataset.idx);
       tickets.splice(idx, 1);
-      // Re-number SR
       tickets.forEach((t, i) => t.srNo = i + 1);
       await saveTickets();
       updateBadge();
@@ -149,7 +142,6 @@ function updateBadge() {
   document.getElementById('count-badge').textContent = tickets.length;
 }
 
-// ─── RECORD ACTIONS
 function setupRecordActions() {
   document.getElementById('btn-export').addEventListener('click', exportToExcel);
   document.getElementById('btn-clear-all').addEventListener('click', async () => {
@@ -162,14 +154,12 @@ function setupRecordActions() {
   });
 }
 
-// ─── EXCEL EXPORT (CSV Format - Excel Compatible)
 async function exportToExcel() {
   if (tickets.length === 0) {
     alert('No tickets to export yet!');
     return;
   }
 
-  // CSV headers in exact order requested
   const headers = [
     'Sr no',
     'Date',
@@ -182,41 +172,35 @@ async function exportToExcel() {
     'Issue found at'
   ];
 
-  // Convert tickets to CSV rows
   const rows = tickets.map(t => [
     t.srNo,
     t.date || '',
     t.ticketId || '',
     t.category || '',
-    t.category || '',           // Same as Category
+    t.category || '',
     t.issueType || '',
     t.desc || '',
     t.response || '',
-    ''                          // Issue found at (blank)
+    ''
   ]);
 
-  // Escape CSV values (handle commas, quotes, newlines)
   const escapeCSV = (value) => {
     if (value === null || value === undefined) return '';
     const str = String(value);
-    // If contains comma, quote, or newline, wrap in quotes and escape quotes
     if (str.includes(',') || str.includes('"') || str.includes('\n')) {
       return '"' + str.replace(/"/g, '""') + '"';
     }
     return str;
   };
 
-  // Build CSV content
   const csvContent = [
     headers.map(escapeCSV).join(','),
     ...rows.map(row => row.map(escapeCSV).join(','))
   ].join('\n');
 
-  // Add UTF-8 BOM for better Excel compatibility
-  const BOM = '\uFEFF';
+  const BOM = '﻿';
   const fullContent = BOM + csvContent;
 
-  // Create blob and download
   const blob = new Blob([fullContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 
@@ -243,24 +227,19 @@ function loadScript(src) {
   });
 }
 
-// ─── AUTO-FILL FROM CAPTURED DATA
 function checkCapturedData() {
   chrome.storage.local.get(['capturedTicket'], result => {
     if (result.capturedTicket) {
       const data = result.capturedTicket;
 
-      // Auto-fill form fields
-      if (data.ticketId) document.getElementById('field-ticket').value = data.ticketId;
-      if (data.category) document.getElementById('field-category').value = data.category;
-      if (data.description) document.getElementById('field-desc').value = data.description;
-      if (data.categoryYou) document.getElementById('field-category-you').value = data.categoryYou;
-      if (data.issueType) document.getElementById('field-issue-type').value = data.issueType;
-      if (data.response) document.getElementById('field-response').value = data.response;
+      if (data.ticketId)    document.getElementById('field-ticket').value        = data.ticketId;
+      if (data.category)    document.getElementById('field-category').value      = data.category;
+      if (data.description) document.getElementById('field-desc').value          = data.description;
+      if (data.categoryYou) document.getElementById('field-category-you').value  = data.categoryYou;
+      if (data.issueType)   document.getElementById('field-issue-type').value    = data.issueType;
+      if (data.response)    document.getElementById('field-response').value      = data.response;
 
-      // Show success toast
       showToast('✅ Ticket data captured from Daisy!', 'success');
-
-      // Clear captured data
       chrome.storage.local.remove('capturedTicket');
     }
   });
